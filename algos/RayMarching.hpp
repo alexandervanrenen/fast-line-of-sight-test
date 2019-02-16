@@ -13,7 +13,7 @@ struct RayMarching {
 
    bool HasLineOfSight(const Line &line) const
    {
-      const ub4 precision = 100; // Defined in samples per block
+      const ub4 precision = 10; // Defined in samples per block
       Point<float> start = line.GetStartPoint();
       Point<float> cur = line.GetStartPoint();
       Point<float> goal = line.GetEndPoint();
