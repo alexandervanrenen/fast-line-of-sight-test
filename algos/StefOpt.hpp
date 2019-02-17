@@ -6,10 +6,12 @@
 // -------------------------------------------------------------------------------------
 namespace unv {
 // -------------------------------------------------------------------------------------
-struct SmartMarch {
+struct StefOpt {
    const std::vector<std::vector<bool>> &grid; // FALSE -> no line of sight
 
-   SmartMarch(const std::vector<std::vector<bool>> &grid)
+   const static sb4 GRID_MIN = 0;
+
+   StefOpt(const std::vector<std::vector<bool>> &grid)
            : grid(grid)
              , textbook(grid) {}
 
@@ -27,7 +29,7 @@ struct SmartMarch {
       if (slope>=-1.0f) {
          float delta_y_float = slope;
          sb8 delta_y = delta_y_float * (sb8(1) << 32);
-         sb4 cur_x = std::max((sb4) ceil(start.x), 1);
+         sb4 cur_x = std::max((sb4) ceil(start.x), GRID_MIN + 1);
          sb8 cur_y = (start.y + (cur_x - start.x) * delta_y_float) * (sb8(1) << 32);
          sb4 limit_x = floor(goal.x);
 

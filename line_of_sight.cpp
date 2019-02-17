@@ -5,7 +5,8 @@
 #include "algos/Textbook.hpp"
 #include "algos/RayMarching.hpp"
 #include "algos/Optimized.hpp"
-#include "algos/SmartMarch.hpp"
+#include "algos/Stef.hpp"
+#include "algos/StefOpt.hpp"
 #include <iostream>
 #include <set>
 #include <chrono>
@@ -40,7 +41,8 @@ int main(int, char **)
    Textbook textbook(grid);
    RayMarching ray_marching(grid);
    Optimized optimized(grid);
-   SmartMarch smart_march(grid);
+   Stef stef(grid);
+   StefOpt stef_opt(grid);
 
    // Create lines
    vector<Line> lines(COUNT);
@@ -51,7 +53,8 @@ int main(int, char **)
    // Validate that all algos give the same result
    ub4 ray_error_count = 0;
    ub4 rotation_error_count = 0;
-   ub4 smart_march_error_count = 0;
+   ub4 stef_error_count = 0;
+   ub4 stef_opt_error_count = 0;
    ub4 optimized_error_count = 0;
    ub8 total_distance = 0;
    for (ub8 i = 0; i<COUNT; ++i) {
@@ -59,25 +62,30 @@ int main(int, char **)
       total_distance += l1.GetStartPoint().ManhattanDistance(l1.GetEndPoint());
       bool textbook_sees_it = textbook.HasLineOfSight(l1.GetStartPoint(), l1.GetEndPoint());
       bool rotation_sees_it = rotation.HasLineOfSight(l1.GetStartPoint(), l1.GetEndPoint());
-      bool smart_march_sees_it = smart_march.HasLineOfSight(l1.GetStartPoint() + Point<float>(0.5f, 0.5f), l1.GetEndPoint() + Point<float>(0.5f, 0.5f));
-//      bool ray_marching_sees_it = ray_marching.HasLineOfSight(l1);
+      bool stef_sees_it = stef.HasLineOfSight(l1.GetStartPoint() + Point<float>(0.5f, 0.5f), l1.GetEndPoint() + Point<float>(0.5f, 0.5f));
+      bool stef_opt_sees_it = stef_opt.HasLineOfSight(l1.GetStartPoint() + Point<float>(0.5f, 0.5f), l1.GetEndPoint() + Point<float>(0.5f, 0.5f));
+      //      bool ray_marching_sees_it = ray_marching.HasLineOfSight(l1);
       bool optimized_sees_it = optimized.HasLineOfSight(l1.GetStartPoint(), l1.GetEndPoint());
-//      if (textbook_sees_it != ray_marching_sees_it) {
-//         ray_error_count++;
-//      }
+      //      if (textbook_sees_it != ray_marching_sees_it) {
+      //         ray_error_count++;
+      //      }
       if (textbook_sees_it != rotation_sees_it) {
          rotation_error_count++;
       }
       if (textbook_sees_it != optimized_sees_it) {
          optimized_error_count++;
       }
-      if (textbook_sees_it != smart_march_sees_it) {
-         smart_march_error_count++;
+      if (textbook_sees_it != stef_sees_it) {
+         stef_error_count++;
+      }
+      if (textbook_sees_it != stef_opt_sees_it) {
+         stef_opt_error_count++;
       }
    }
    cout << "ray_error_count: " << ray_error_count << endl;
    cout << "rotation_error_count: " << rotation_error_count << endl;
-   cout << "smart_march_error_count: " << smart_march_error_count << endl;
+   cout << "stef_error_count: " << stef_opt_error_count << endl;
+   cout << "stef_opt_error_count: " << stef_opt_error_count << endl;
    cout << "optimized_error_count: " << optimized_error_count << endl;
 
    // Benchmark textbook algo
@@ -101,14 +109,14 @@ int main(int, char **)
    }
 
    // Benchmark ray_marching algo
-//   {
-//      auto begin = chrono::high_resolution_clock::now();
-//      for (ub8 i = 0; i<COUNT; ++i) {
-//         DoNotOptimize(ray_marching.HasLineOfSight(lines[i]));
-//      }
-//      auto end = chrono::high_resolution_clock::now();
-//      cout << "ray_marching: " << chrono::duration_cast<chrono::nanoseconds>(end - begin).count() / COUNT << "ns" << endl;
-//   }
+   //   {
+   //      auto begin = chrono::high_resolution_clock::now();
+   //      for (ub8 i = 0; i<COUNT; ++i) {
+   //         DoNotOptimize(ray_marching.HasLineOfSight(lines[i]));
+   //      }
+   //      auto end = chrono::high_resolution_clock::now();
+   //      cout << "ray_marching: " << chrono::duration_cast<chrono::nanoseconds>(end - begin).count() / COUNT << "ns" << endl;
+   //   }
 
    // Benchmark optimized algo
    {
@@ -120,13 +128,23 @@ int main(int, char **)
       cout << "optimized: " << chrono::duration_cast<chrono::nanoseconds>(end - begin).count() / COUNT << "ns" << endl;
    }
 
-   // Benchmark smart_march algo
+   // Benchmark stef algo
    {
       auto begin = chrono::high_resolution_clock::now();
       for (ub8 i = 0; i<COUNT; ++i) {
-         DoNotOptimize(smart_march.HasLineOfSight(lines[i].GetStartPoint() + Point<float>(0.5f, 0.5f), lines[i].GetEndPoint() + Point<float>(0.5f, 0.5f)));
+         DoNotOptimize(stef.HasLineOfSight(lines[i].GetStartPoint() + Point<float>(0.5f, 0.5f), lines[i].GetEndPoint() + Point<float>(0.5f, 0.5f)));
       }
       auto end = chrono::high_resolution_clock::now();
-      cout << "smart_march: " << chrono::duration_cast<chrono::nanoseconds>(end - begin).count() / COUNT << "ns" << endl;
+      cout << "stef: " << chrono::duration_cast<chrono::nanoseconds>(end - begin).count() / COUNT << "ns" << endl;
+   }
+
+   // Benchmark stef_opt algo
+   {
+      auto begin = chrono::high_resolution_clock::now();
+      for (ub8 i = 0; i<COUNT; ++i) {
+         DoNotOptimize(stef_opt.HasLineOfSight(lines[i].GetStartPoint() + Point<float>(0.5f, 0.5f), lines[i].GetEndPoint() + Point<float>(0.5f, 0.5f)));
+      }
+      auto end = chrono::high_resolution_clock::now();
+      cout << "stef_opt: " << chrono::duration_cast<chrono::nanoseconds>(end - begin).count() / COUNT << "ns" << endl;
    }
 }
